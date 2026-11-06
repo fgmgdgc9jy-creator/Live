@@ -1,11 +1,181 @@
-PIKE LIVEE
-PLATFORMË PËR PIKË VIRTUALE
+<!DOCTYPE html>
 
-Hyr në llogari
+<html lang="sq">
 
-Emri i përdoruesit
- Vazhdo
-Për demonstrim lokal. Kjo faqe nuk krijon ende llogari të përbashkëta në telefona të ndryshëm.
+<head>
 
-Shënim i rëndësishëm: Ky është prototip demonstrues. Të dhënat ruhen vetëm në këtë shfletues dhe nuk sinkronizohen me telefona të tjerë. Për përdorim real duhen databazë, hyrje e sigurt dhe panel administratori i mbrojtur.
-PIKE LIVEE · Vetëm pikë virtuale, jo para reale
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>PIKE LIVEE</title>
+
+<style>
+
+*{box-sizing:border-box}
+
+body{margin:0;background:#10141d;color:white;font-family:Arial,sans-serif}
+
+header{background:#191f2c;padding:22px;text-align:center;border-bottom:2px solid #e5b52b}
+
+h1{margin:0;color:#f3c642;letter-spacing:2px}
+
+main{max-width:430px;margin:30px auto;padding:18px}
+
+.card{background:#1c2432;border-radius:14px;padding:20px;margin-bottom:18px}
+
+input,button{width:100%;padding:14px;margin-top:10px;border:0;border-radius:8px;font-size:16px}
+
+input{background:#303b4e;color:white}
+
+button{background:#e5b52b;color:#151515;font-weight:bold;cursor:pointer}
+
+.balance{font-size:38px;color:#f3c642;text-align:center;font-weight:bold}
+
+.small{text-align:center;color:#aeb8c8;font-size:13px}
+
+.hidden{display:none}
+
+</style>
+
+</head>
+
+<body>
+
+<header><h1>PIKE LIVEE</h1></header>
+
+<main>
+
+<section class="card" id="login">
+
+<h2>Kyçu në llogari</h2>
+
+<input id="username" placeholder="Emri i përdoruesit">
+
+<input id="password" type="password" placeholder="Fjalëkalimi">
+
+<button onclick="loginUser()">KYÇU</button>
+
+<p class="small">Pikë virtuale – pa para reale.</p>
+
+</section>
+
+<section class="card hidden" id="userPanel">
+
+<h2 id="welcome"></h2>
+
+<p class="small">Bilanci yt</p>
+
+<div class="balance" id="balance">0</div>
+
+<p class="small">PIKË</p>
+
+<button onclick="logout()">DIL</button>
+
+</section>
+
+<section class="card hidden" id="adminPanel">
+
+<h2>Administratori</h2>
+
+<input id="target" placeholder="Emri i përdoruesit">
+
+<input id="amount" type="number" placeholder="Numri i pikëve">
+
+<button onclick="changePoints(1)">SHTO PIKË</button>
+
+<button onclick="changePoints(-1)">ZBRIT PIKË</button>
+
+<div id="message" class="small"></div>
+
+</section>
+
+</main>
+
+<script>
+
+let users = JSON.parse(localStorage.getItem("pikeUsers") || "{}");
+
+let current = null;
+
+function save(){
+
+ localStorage.setItem("pikeUsers",JSON.stringify(users));
+
+}
+
+function loginUser(){
+
+ let name=document.getElementById("username").value.trim();
+
+ let pass=document.getElementById("password").value;
+
+ if(!name||!pass){alert("Plotëso të dhënat.");return;}
+
+ if(!users[name]){
+
+  users[name]={password:pass,points:0};
+
+  save();
+
+ }
+
+ if(users[name].password!==pass){
+
+  alert("Fjalëkalimi është gabim.");
+
+  return;
+
+ }
+
+ current=name;
+
+ document.getElementById("login").classList.add("hidden");
+
+ document.getElementById("userPanel").classList.remove("hidden");
+
+ document.getElementById("welcome").textContent="Mirë se erdhe, "+name;
+
+ document.getElementById("balance").textContent=users[name].points;
+
+ if(name==="admin"){
+
+  document.getElementById("adminPanel").classList.remove("hidden");
+
+ }
+
+}
+
+function changePoints(direction){
+
+ let target=document.getElementById("target").value.trim();
+
+ let amount=Number(document.getElementById("amount").value);
+
+ if(current!=="admin"){return;}
+
+ if(!users[target]||!Number.isInteger(amount)||amount<=0){
+
+  document.getElementById("message").textContent="Kontrollo emrin dhe pikët.";
+
+  return;
+
+ }
+
+ if(direction<0 && users[target].points<amount){
+
+  document.getElementById("message").textContent="Nuk ka pikë të mjaftueshme.";
+
+  return;
+
+ }
+
+ users[target].points+=amount*direction;
+
+ save();
+
+ document.getElementById("message").textContent="Bilanci i "+target+" u ndryshua.";
+
+ if(target===current){
+
+  document.getElementById("balance").textContent=users[current].points;
